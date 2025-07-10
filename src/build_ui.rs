@@ -18,6 +18,28 @@ pub fn build_ui(app: &adw::Application) {
     glib::set_application_name("Cosmo libAdwaita in RS Template");
     let glib_settings = gio::Settings::new("com.github.adw-rs-test.cosmo");
 
+    let file_menu = gio::Menu::new();
+    file_menu.append(Some("About"), Some("app.about"));
+    file_menu.append(Some("Quit"), Some("app.quit"));
+
+    let file_menu_item = gio::MenuItem::new(Some("File"), None);
+    file_menu_item.set_submenu(Some(&file_menu));
+
+    // === Top-Level Menu ===
+    let app_menu = gio::Menu::new();
+    app_menu.append_item(&file_menu_item);
+    app.set_menubar(Some(&app_menu));
+
+    let about_action = gio::SimpleAction::new("about", None);
+    about_action.connect_activate(|_, _| {
+        println!("About selected");
+    });
+    app.add_action(&about_action);
+
+    let quit_action = gio::SimpleAction::new("quit", None);
+    app.add_action(&quit_action);
+
+    
     // Create a label called "_warning_label"
     let _warning_label = Label::builder()
         // Label Text
@@ -107,7 +129,11 @@ pub fn build_ui(app: &adw::Application) {
     window.connect_hide(clone!(@weak window => move |_| window.destroy()));
 
     // show the window
-    window.present()
+    window.present();
+
+    quit_action.connect_activate(move |app, _| {
+        window.destroy();
+    });
 }
 
 
